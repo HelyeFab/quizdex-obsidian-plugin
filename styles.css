@@ -1,0 +1,1088 @@
+/* Quiz Generator Plugin Styles */
+
+.quiz-container {
+	padding: 20px;
+	max-width: 800px;
+	margin: 0 auto;
+}
+
+/* Note selection modal styles */
+.search-input {
+	width: 100%;
+	padding: 8px 12px;
+	margin-bottom: 15px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background-color: var(--background-primary);
+	color: var(--text-normal);
+}
+
+.search-input:focus {
+	outline: none;
+	border-color: var(--interactive-accent);
+}
+
+.note-item:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+/* Quiz view styles */
+.quiz-welcome {
+	text-align: center;
+	max-height: 100vh;
+	overflow-y: auto;
+	padding: 40px 20px;
+}
+
+.quiz-welcome h2 {
+	color: var(--interactive-accent);
+	margin-bottom: 20px;
+}
+
+.quiz-welcome .instructions {
+	text-align: left;
+	max-width: 500px;
+	margin: 30px auto;
+}
+
+.quiz-welcome .instructions ul {
+	margin-left: 20px;
+}
+
+.quiz-welcome .instructions li {
+	margin-bottom: 8px;
+}
+
+/* Quiz question styles */
+.quiz-header h2 {
+	color: var(--interactive-accent);
+	text-align: center;
+	margin-bottom: 10px;
+}
+
+.quiz-header p {
+	text-align: center;
+	color: var(--text-muted);
+	margin-bottom: 20px;
+}
+
+.progress-container {
+	margin: 20px 0;
+}
+
+.progress-bar {
+	background-color: var(--background-modifier-border);
+	border-radius: 4px;
+	height: 8px;
+	overflow: hidden;
+}
+
+.progress-fill {
+	background-color: var(--interactive-accent);
+	height: 100%;
+	transition: width 0.3s ease;
+}
+
+.progress-text {
+	text-align: center;
+	margin-top: 8px;
+	font-size: 0.9em;
+	color: var(--text-muted);
+}
+
+.question-text {
+	font-size: 1.2em;
+	margin-bottom: 20px;
+	line-height: 1.4;
+}
+
+.option-item {
+	margin: 10px 0;
+	padding: 15px;
+	border: 2px solid var(--background-modifier-border);
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	background-color: var(--background-primary);
+	position: relative;
+	font-size: 1.1em;
+}
+
+.option-item:hover {
+	background-color: var(--background-modifier-hover);
+	border-color: var(--background-modifier-border-hover);
+	transform: translateX(2px);
+}
+
+.option-item.selected {
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-color: var(--interactive-accent);
+	transform: translateX(5px);
+	box-shadow: 0 4px 12px rgba(var(--interactive-accent-rgb), 0.3);
+}
+
+/* True/False specific styling */
+.option-item.true-false {
+	margin: 15px 0;
+	padding: 20px;
+	border-radius: 12px;
+	font-size: 1.3em;
+	font-weight: bold;
+	text-align: center;
+	min-height: 60px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.option-item.true-false.selected.true {
+	background-color: var(--color-green);
+	border-color: var(--color-green);
+	color: white;
+	transform: scale(1.05);
+	box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+}
+
+.option-item.true-false.selected.false {
+	background-color: var(--color-red);
+	border-color: var(--color-red);
+	color: white;
+	transform: scale(1.05);
+	box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+}
+
+.navigation-container {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 40px;
+	padding: 20px 0;
+	border-top: 2px solid var(--background-modifier-border);
+}
+
+.nav-left, .nav-right {
+	flex: 1;
+}
+
+.nav-center {
+	flex: 1;
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.question-counter {
+	font-size: 1.2em;
+	font-weight: bold;
+	color: var(--interactive-accent);
+}
+
+.answer-status {
+	font-size: 0.9em;
+	margin-top: 5px;
+	font-weight: normal;
+}
+
+.answer-status.answered {
+	color: var(--text-success);
+	font-weight: bold;
+}
+
+.answer-status.unanswered {
+	color: var(--text-muted);
+}
+
+/* Enhanced button styling */
+.nav-btn {
+	padding: 12px 24px !important;
+	font-size: 1.1em !important;
+	border-radius: 8px !important;
+	border: 2px solid var(--background-modifier-border) !important;
+	transition: all 0.2s ease !important;
+}
+
+.nav-btn:disabled {
+	opacity: 0.3 !important;
+}
+
+.nav-btn:not(:disabled):hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Results styles */
+.results-header h2 {
+	text-align: center;
+	color: var(--interactive-accent);
+	margin-bottom: 20px;
+}
+
+.score-summary {
+	text-align: center;
+	margin: 30px auto;
+	padding: 30px;
+	border: 2px solid var(--interactive-accent);
+	border-radius: 12px;
+	background-color: var(--background-secondary);
+	max-width: 400px;
+}
+
+.score-text {
+	font-size: 3em;
+	font-weight: bold;
+	color: var(--interactive-accent);
+	line-height: 1.2;
+}
+
+.percentage-text {
+	font-size: 2em;
+	color: var(--text-muted);
+	margin: 10px 0;
+}
+
+.time-text {
+	font-size: 1em;
+	color: var(--text-muted);
+	margin-top: 15px;
+}
+
+.results-details h3 {
+	color: var(--text-normal);
+	margin: 30px 0 20px 0;
+	font-size: 1.3em;
+}
+
+/* Scrollable question details */
+.scrollable-questions {
+	max-height: 500px;
+	overflow-y: auto;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	padding: 15px;
+	background-color: var(--background-primary);
+	scrollbar-width: thin;
+	scrollbar-color: var(--interactive-accent) var(--background-secondary);
+}
+
+/* Webkit scrollbar styling for scrollable areas */
+.scrollable-questions::-webkit-scrollbar {
+	width: 8px;
+}
+
+.scrollable-questions::-webkit-scrollbar-track {
+	background: var(--background-secondary);
+	border-radius: 4px;
+}
+
+.scrollable-questions::-webkit-scrollbar-thumb {
+	background: var(--interactive-accent);
+	border-radius: 4px;
+	opacity: 0.7;
+}
+
+.scrollable-questions::-webkit-scrollbar-thumb:hover {
+	background: var(--interactive-accent-hover);
+	opacity: 1;
+}
+
+.result-item {
+	margin: 20px 0;
+	padding: 20px;
+	border-radius: 8px;
+	border-left: 4px solid;
+}
+
+.result-item.correct {
+	border-left-color: var(--text-success);
+	background-color: rgba(var(--color-green-rgb), 0.1);
+}
+
+.result-item.incorrect {
+	border-left-color: var(--text-error);
+	background-color: rgba(var(--color-red-rgb), 0.1);
+}
+
+.result-question {
+	font-weight: bold;
+	margin-bottom: 12px;
+	font-size: 1.1em;
+}
+
+.result-answers {
+	margin-bottom: 15px;
+}
+
+.user-answer {
+	margin: 8px 0;
+	padding: 8px;
+	border-radius: 4px;
+	background-color: var(--background-primary);
+}
+
+.correct-answer {
+	margin: 8px 0;
+	padding: 8px;
+	border-radius: 4px;
+	background-color: var(--background-primary);
+}
+
+.explanation {
+	margin-top: 15px;
+	padding: 15px;
+	background-color: var(--background-secondary);
+	border-radius: 6px;
+	border-left: 3px solid var(--interactive-accent);
+	max-height: 150px;
+	overflow-y: auto;
+	line-height: 1.5;
+	scrollbar-width: thin;
+	scrollbar-color: var(--text-muted) var(--background-secondary);
+}
+
+/* Webkit scrollbar for explanations */
+.explanation::-webkit-scrollbar {
+	width: 6px;
+}
+
+.explanation::-webkit-scrollbar-track {
+	background: var(--background-primary);
+	border-radius: 3px;
+}
+
+.explanation::-webkit-scrollbar-thumb {
+	background: var(--text-muted);
+	border-radius: 3px;
+	opacity: 0.6;
+}
+
+.explanation::-webkit-scrollbar-thumb:hover {
+	background: var(--text-normal);
+	opacity: 0.8;
+}
+
+.results-actions {
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 15px;
+	margin-top: 30px;
+	padding: 20px;
+	border-top: 1px solid var(--background-modifier-border);
+	background-color: var(--background-secondary-alt);
+	border-radius: 0 0 8px 8px;
+}
+
+.results-actions .mod-cta {
+	order: 1;
+}
+
+.results-actions button:not(.mod-cta) {
+	order: 2;
+}
+
+/* Close button specific styling */
+.results-actions button[style*="background-modifier-error"] {
+	order: 3;
+	margin-left: auto;
+	transition: all 0.2s ease;
+}
+
+.results-actions button[style*="background-modifier-error"]:hover {
+	background-color: var(--background-modifier-error-hover) !important;
+	transform: scale(1.05);
+}
+
+/* Welcome screen actions */
+.welcome-actions {
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-actions .clickable-icon {
+	margin-bottom: 8px;
+	border-radius: 6px;
+	transition: all 0.2s ease;
+	font-weight: 500;
+}
+
+.welcome-actions .clickable-icon:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.welcome-actions .mod-cta {
+	background: linear-gradient(135deg, var(--interactive-accent), var(--interactive-accent-hover));
+}
+
+.welcome-actions .mod-cta:hover {
+	background: linear-gradient(135deg, var(--interactive-accent-hover), var(--interactive-accent));
+}
+
+/* Buy Me a Coffee Button */
+.quiz-welcome a[href*="buymeacoffee"] {
+	animation: coffeePulse 3s ease-in-out infinite;
+	border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.quiz-welcome a[href*="buymeacoffee"]:hover {
+	animation: none; /* Stop pulsing on hover */
+}
+
+/* Coffee button pulse animation */
+@keyframes coffeePulse {
+	0%, 100% { 
+		box-shadow: 0 2px 8px rgba(255, 95, 95, 0.3);
+		transform: scale(1);
+	}
+	50% { 
+		box-shadow: 0 2px 12px rgba(255, 95, 95, 0.5);
+		transform: scale(1.05);
+	}
+}
+
+/* Quiz Scrollable Container */
+.quiz-scrollable-container {
+	max-height: calc(100vh - 200px); /* Leave space for navigation */
+}
+
+.quiz-scrollable-container::-webkit-scrollbar {
+	width: 8px;
+}
+
+.quiz-scrollable-container::-webkit-scrollbar-track {
+	background: var(--background-modifier-border);
+	border-radius: 4px;
+}
+
+.quiz-scrollable-container::-webkit-scrollbar-thumb {
+	background: var(--interactive-accent);
+	border-radius: 4px;
+	opacity: 0.7;
+}
+
+.quiz-scrollable-container::-webkit-scrollbar-thumb:hover {
+	background: var(--interactive-accent-hover);
+	opacity: 1;
+}
+
+/* Navigation container fixed positioning */
+.navigation-container {
+	box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Results Scrollable Container */
+.results-scrollable-container {
+	max-height: calc(100vh - 100px);
+	overflow-y: auto; /* Enable scrolling to see all content and buttons - Leave space for UI elements */
+}
+
+.results-scrollable-container::-webkit-scrollbar {
+	width: 8px;
+}
+
+.results-scrollable-container::-webkit-scrollbar-track {
+	background: var(--background-modifier-border);
+	border-radius: 4px;
+}
+
+.results-scrollable-container::-webkit-scrollbar-thumb {
+	background: var(--interactive-accent);
+	border-radius: 4px;
+	opacity: 0.7;
+}
+
+.results-scrollable-container::-webkit-scrollbar-thumb:hover {
+	background: var(--interactive-accent-hover);
+	opacity: 1;
+}
+
+/* Pokemon Challenge Styling */
+.pokemon-challenge {
+	box-shadow: 0 4px 16px rgba(var(--interactive-accent-rgb), 0.2);
+	animation: pokemonChallengePulse 3s ease-in-out infinite;
+}
+
+.pokemon-challenge img {
+	transition: transform 0.3s ease;
+}
+
+.pokemon-challenge:hover img {
+	transform: scale(1.1);
+}
+
+/* Pokemon Challenge Banner - More prominent version */
+.pokemon-challenge-banner {
+	position: relative;
+	overflow: hidden;
+}
+
+.pokemon-challenge-banner::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+	animation: shimmer 3s infinite;
+	z-index: 1;
+}
+
+.pokemon-challenge-banner img {
+	transition: all 0.3s ease;
+	z-index: 2;
+	position: relative;
+}
+
+.pokemon-challenge-banner:hover img {
+	transform: scale(1.05) rotate(5deg);
+}
+
+/* Pokemon Challenge in Quiz Generation Modal */
+.pokemon-challenge-info {
+	animation: pokemonAppear 0.8s ease-out;
+}
+
+/* Pokedex Component Styling */
+.pokedex-container {
+	padding: 15px;
+	background: var(--background-secondary);
+	border-radius: 12px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	margin-bottom: 20px;
+}
+
+.pokedex-header {
+	margin-bottom: 20px;
+	padding-bottom: 15px;
+	border-bottom: 2px solid var(--background-modifier-border);
+}
+
+.pokedex-stats {
+	display: flex;
+	justify-content: space-between;
+	margin: 10px 0;
+	font-size: 0.9em;
+}
+
+.stat-item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+}
+
+.stat-label {
+	color: var(--text-muted);
+	font-weight: 500;
+}
+
+.stat-value {
+	color: var(--interactive-accent);
+	font-weight: bold;
+	font-size: 1.1em;
+}
+
+.progress-container {
+	margin: 15px 0;
+}
+
+.progress-bar {
+	width: 100%;
+	height: 8px;
+	background-color: var(--background-modifier-border);
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.progress-fill {
+	height: 100%;
+	background: linear-gradient(90deg, var(--interactive-accent), var(--interactive-accent-hover));
+	transition: width 0.6s ease;
+	border-radius: 4px;
+}
+
+/* Pokemon Grid */
+.pokemon-grid-container {
+	max-height: 400px;
+	overflow: hidden;
+}
+
+.pokemon-scroll-area {
+	max-height: 380px;
+	overflow-y: auto;
+	padding-right: 8px;
+}
+
+.pokemon-scroll-area::-webkit-scrollbar {
+	width: 8px;
+}
+
+.pokemon-scroll-area::-webkit-scrollbar-track {
+	background: var(--background-modifier-border);
+	border-radius: 4px;
+}
+
+.pokemon-scroll-area::-webkit-scrollbar-thumb {
+	background: var(--interactive-accent);
+	border-radius: 4px;
+	opacity: 0.7;
+}
+
+.pokemon-scroll-area::-webkit-scrollbar-thumb:hover {
+	background: var(--interactive-accent-hover);
+	opacity: 1;
+}
+
+.pokemon-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+	gap: 12px;
+	padding: 10px 0;
+}
+
+.pokemon-entry {
+	position: relative;
+	padding: 12px;
+	border: 2px solid var(--background-modifier-border);
+	border-radius: 8px;
+	background: var(--background-primary);
+	cursor: pointer;
+	transition: all 0.3s ease;
+	text-align: center;
+	min-height: 140px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.pokemon-entry:hover {
+	border-color: var(--interactive-accent);
+	box-shadow: 0 4px 12px rgba(var(--interactive-accent-rgb), 0.2);
+}
+
+.pokemon-entry.caught {
+	border-color: var(--color-green);
+	background: var(--background-modifier-success);
+}
+
+.pokemon-entry.caught:hover {
+	box-shadow: 0 4px 12px rgba(var(--color-green-rgb), 0.3);
+}
+
+.pokemon-entry.uncaught {
+	opacity: 0.7;
+}
+
+.pokemon-number {
+	font-size: 0.8em;
+	color: var(--text-muted);
+	font-weight: 600;
+	margin-bottom: 8px;
+}
+
+.pokemon-sprite-container {
+	width: 64px;
+	height: 64px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 8px 0;
+}
+
+.pokemon-sprite {
+	max-width: 64px;
+	max-height: 64px;
+	image-rendering: pixelated;
+	transition: all 0.3s ease;
+}
+
+.pokemon-entry:hover .pokemon-sprite {
+	transform: scale(1.1);
+}
+
+.missing-sprite {
+	font-size: 2em;
+	color: var(--text-muted);
+}
+
+.pokemon-name {
+	font-size: 0.85em;
+	font-weight: 600;
+	color: var(--text-normal);
+	text-transform: capitalize;
+	margin-top: 4px;
+}
+
+.caught-indicator {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	background: var(--color-green);
+	color: white;
+	border-radius: 50%;
+	width: 20px;
+	height: 20px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 0.8em;
+	font-weight: bold;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Pokemon Modal */
+.pokemon-modal-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background: rgba(0, 0, 0, 0.7);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 10000;
+	animation: modalFadeIn 0.3s ease;
+}
+
+.pokemon-modal {
+	background: var(--background-primary);
+	border-radius: 12px;
+	max-width: 500px;
+	width: 90%;
+	max-height: 80vh;
+	overflow: hidden;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+	animation: modalSlideIn 0.3s ease;
+}
+
+.pokemon-modal-header {
+	padding: 20px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	background: var(--background-secondary);
+}
+
+.pokemon-modal-header h2 {
+	margin: 0;
+	color: var(--interactive-accent);
+}
+
+.close-btn {
+	background: none;
+	border: none;
+	font-size: 24px;
+	cursor: pointer;
+	color: var(--text-muted);
+	padding: 4px;
+	border-radius: 4px;
+	transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+	color: var(--text-error);
+	background: var(--background-modifier-error);
+}
+
+.pokemon-modal-content {
+	padding: 20px;
+	display: flex;
+	gap: 20px;
+	align-items: flex-start;
+}
+
+.pokemon-sprite-section {
+	flex-shrink: 0;
+}
+
+.large-pokemon-sprite {
+	width: 120px;
+	height: 120px;
+	image-rendering: pixelated;
+	border-radius: 8px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.pokemon-info-section {
+	flex: 1;
+}
+
+.info-row {
+	margin: 12px 0;
+	padding: 8px 0;
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.info-row:last-child {
+	border-bottom: none;
+}
+
+.pokemon-type {
+	padding: 4px 8px;
+	border-radius: 4px;
+	color: white;
+	font-size: 0.85em;
+	font-weight: 600;
+	margin-right: 6px;
+	text-transform: capitalize;
+}
+
+.caught-status {
+	color: var(--color-green);
+	font-size: 1.1em;
+	margin: 15px 0 10px 0;
+}
+
+.uncaught-status {
+	color: var(--text-muted);
+	font-size: 1.1em;
+	margin: 15px 0 10px 0;
+}
+
+.caught-details {
+	background: var(--background-secondary);
+	padding: 12px;
+	border-radius: 6px;
+	margin-top: 10px;
+}
+
+.caught-details p {
+	margin: 4px 0;
+	font-size: 0.9em;
+}
+
+/* Pokemon Loading */
+.pokedex-loading {
+	text-align: center;
+	padding: 40px 20px;
+}
+
+.loading-spinner {
+	font-size: 3em;
+	animation: spin 2s linear infinite;
+	margin-bottom: 15px;
+}
+
+.pokedex-empty {
+	text-align: center;
+	padding: 40px 20px;
+	color: var(--text-muted);
+}
+
+.empty-icon {
+	font-size: 3em;
+	margin-bottom: 15px;
+}
+
+/* Pokemon Results */
+.pokemon-results {
+	animation: pokemonResultsAppear 0.8s ease-out;
+}
+
+/* Pokemon Animations */
+@keyframes pokemonFloat {
+	0%, 100% { transform: translateY(0px); }
+	50% { transform: translateY(-10px); }
+}
+
+@keyframes pokemonChallengePulse {
+	0%, 100% { box-shadow: 0 4px 16px rgba(var(--interactive-accent-rgb), 0.2); }
+	50% { box-shadow: 0 4px 20px rgba(var(--interactive-accent-rgb), 0.4); }
+}
+
+@keyframes pokemonAppear {
+	0% {
+		opacity: 0;
+		transform: scale(0.8) translateY(20px);
+	}
+	100% {
+		opacity: 1;
+		transform: scale(1) translateY(0);
+	}
+}
+
+@keyframes pokemonCaught {
+	0% { transform: scale(1); }
+	25% { transform: scale(1.2) rotate(5deg); }
+	50% { transform: scale(0.9) rotate(-5deg); }
+	75% { transform: scale(1.1) rotate(3deg); }
+	100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes pokemonResultsAppear {
+	0% {
+		opacity: 0;
+		transform: translateY(30px);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes spin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+
+@keyframes modalFadeIn {
+	0% { opacity: 0; }
+	100% { opacity: 1; }
+}
+
+@keyframes modalSlideIn {
+	0% {
+		opacity: 0;
+		transform: scale(0.8) translateY(-50px);
+	}
+	100% {
+		opacity: 1;
+		transform: scale(1) translateY(0);
+	}
+}
+
+@keyframes shimmer {
+	0% { left: -100%; }
+	100% { left: 100%; }
+}
+
+/* Modal styles */
+.modal .quiz-list {
+	max-height: 400px;
+	overflow-y: auto;
+}
+
+.quiz-item {
+	padding: 15px;
+	margin: 8px 0;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.quiz-item:hover {
+	background-color: var(--background-modifier-hover);
+	border-color: var(--background-modifier-border-hover);
+}
+
+.quiz-name {
+	font-weight: bold;
+	margin-bottom: 6px;
+}
+
+.quiz-date {
+	font-size: 0.9em;
+	color: var(--text-muted);
+}
+
+/* Model selection styles */
+.model-selection {
+	background-color: var(--background-secondary-alt);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	padding: 20px;
+	margin: 15px 0;
+}
+
+.model-info {
+	color: var(--text-muted);
+	font-size: 0.9em;
+	margin-bottom: 10px;
+}
+
+/* Connection test styles */
+.connection-test {
+	background-color: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	padding: 20px;
+	margin: 20px 0;
+}
+
+.connection-success {
+	color: var(--text-success);
+	font-weight: bold;
+}
+
+.connection-error {
+	color: var(--text-error);
+	font-weight: bold;
+}
+
+/* Settings styles */
+.setting-item-description {
+	color: var(--text-muted);
+	font-size: 0.9em;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+	.quiz-container {
+		padding: 15px;
+	}
+	
+	.score-text {
+		font-size: 2.5em;
+	}
+	
+	.percentage-text {
+		font-size: 1.5em;
+	}
+	
+	.navigation-container {
+		flex-direction: column;
+		gap: 15px;
+	}
+	
+	.results-actions {
+		flex-direction: column;
+		align-items: center;
+	}
+}
+/* Custom QD Ribbon Icon */
+.side-dock-ribbon-action[aria-label*="QuizDex"] svg {
+	display: none !important;
+}
+
+.side-dock-ribbon-action[aria-label*="QuizDex"]::after {
+	content: "QD";
+	font-weight: bold;
+	font-size: 14px;
+	color: var(--text-normal);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+}
+
+.side-dock-ribbon-action[aria-label*="QuizDex"]:hover::after {
+	color: var(--interactive-accent);
+}
+
+/* Welcome screen scrollbar styling */
+.quiz-welcome::-webkit-scrollbar {
+	width: 8px;
+}
+
+.quiz-welcome::-webkit-scrollbar-track {
+	background: var(--background-modifier-border);
+	border-radius: 4px;
+}
+
+.quiz-welcome::-webkit-scrollbar-thumb {
+	background: var(--interactive-accent);
+	border-radius: 4px;
+	opacity: 0.7;
+}
+
+.quiz-welcome::-webkit-scrollbar-thumb:hover {
+	background: var(--interactive-accent-hover);
+	opacity: 1;
+}
