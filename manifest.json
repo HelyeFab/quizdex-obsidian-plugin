@@ -1,0 +1,11 @@
+{
+	"id": "quizdex",
+	"name": "QuizDex",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "🎮 Turn studying into a Pokémon adventure! Generate AI-powered quizzes from your notes, catch Pokémon with perfect scores, and build your ultimate study Pokédex. Gotta learn 'em all! Support development 🍕 ⚡",
+	"author": "QuizDex Team",
+	"authorUrl": "",
+	"fundingUrl": "https://www.buymeacoffee.com/YbEwc5qvHT",
+	"isDesktopOnly": false
+}
