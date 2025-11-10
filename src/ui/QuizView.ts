@@ -507,7 +507,7 @@ export class QuizView extends ItemView {
 	private renderResults(container: HTMLElement) {
 		if (!this.session) return;
 
-		// Add top button bar to results screen
+		// Add top button bar to results screen - NO separate close button needed
 		this.addTopButtonBar(container, false);
 
 		const { quiz, answers, startTime } = this.session;
@@ -529,21 +529,6 @@ export class QuizView extends ItemView {
 		const duration = Math.floor((Date.now() - startTime.getTime()) / 1000);
 		const minutes = Math.floor(duration / 60);
 		const seconds = duration % 60;
-
-		// Close button (top right)
-		const closeContainer = container.createDiv('results-close-container');
-		closeContainer.style.display = 'flex';
-		closeContainer.style.justifyContent = 'flex-end';
-		closeContainer.style.padding = '12px 20px 0 20px';
-
-		const closeBtnTop = new ButtonComponent(closeContainer);
-		closeBtnTop.setButtonText('✕ Close');
-		closeBtnTop.setClass('mod-warning');
-		closeBtnTop.buttonEl.classList.add('results-close-btn');
-		closeBtnTop.onClick(() => {
-			this.session = null;
-			this.renderWelcomeScreen();
-		});
 
 		// Scrollable results container
 		const scrollContainer = container.createDiv('results-scrollable-container');
@@ -627,6 +612,13 @@ export class QuizView extends ItemView {
 		newQuizBtn.onClick(() => {
 			// @ts-ignore - commands property exists at runtime
 			this.app.commands.executeCommandById('quizdex:generate-quiz');
+		});
+
+		const closeBtn = new ButtonComponent(actionsContainer);
+		closeBtn.setButtonText('✕ Close');
+		closeBtn.onClick(() => {
+			this.session = null;
+			this.renderWelcomeScreen();
 		});
 	}
 
