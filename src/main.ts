@@ -12,6 +12,7 @@ import { Plugin, Notice } from 'obsidian';
 import { CredentialManager } from './security/CredentialManager';
 import { AIProviderOrchestrator } from './services/AIProviderOrchestrator';
 import { ProviderFactory } from './services/ProviderFactory';
+import { StorageService } from './services/StorageService';
 import { PassphraseModal, MigrationModal } from './ui/PassphraseModal';
 import { QuizDexSettingTab } from './ui/SettingsTab';
 import { AIProviderConfig } from './types/quiz.types';
@@ -86,6 +87,7 @@ export default class QuizDexPlugin extends Plugin {
 	settings!: QuizDexSettings;
 	credentialManager!: CredentialManager;
 	orchestrator!: AIProviderOrchestrator;
+	storageService!: StorageService;
 	private passphraseCache: string | null = null;
 
 	async onload() {
@@ -93,6 +95,10 @@ export default class QuizDexPlugin extends Plugin {
 
 		// Load settings
 		await this.loadSettings();
+
+		// Initialize storage service
+		this.storageService = new StorageService(this.app);
+		await this.storageService.initialize();
 
 		// Initialize credential manager
 		this.credentialManager = new CredentialManager(this);
@@ -418,5 +424,15 @@ export default class QuizDexPlugin extends Plugin {
 
 		new Notice(statusMessages.join('\n'), 8000);
 		console.log('Provider Status:', Object.fromEntries(status));
+	}
+
+	/**
+	 * Get the path to the Pokemon icon asset
+	 */
+	getPokemonIconPath(): string | null {
+		const adapter = this.app.vault.adapter;
+		const pluginDir = (adapter as any).getBasePath?.() || '';
+		const iconPath = `${pluginDir}/.obsidian/plugins/quizdex/assets/icons/pokemon-go.png`;
+		return iconPath;
 	}
 }

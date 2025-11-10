@@ -61,6 +61,16 @@ export interface Pokemon {
 	weight: number;
 }
 
+export interface QuizResult {
+	quizId: string;
+	score: number;
+	correctCount: number;
+	totalQuestions: number;
+	timeTaken: number;
+	completedAt: string;
+	answers: Map<string, string>;
+}
+
 // AI Provider Types
 
 export interface AIProviderConfig {

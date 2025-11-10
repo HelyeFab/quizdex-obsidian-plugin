@@ -28,7 +28,7 @@ __export(main_exports, {
   default: () => QuizDexPlugin
 });
 module.exports = __toCommonJS(main_exports);
-var import_obsidian7 = require("obsidian");
+var import_obsidian8 = require("obsidian");
 
 // src/security/CredentialManager.ts
 var import_obsidian = require("obsidian");
@@ -1228,9 +1228,314 @@ var ProviderFactory = class {
   }
 };
 
-// src/ui/PassphraseModal.ts
+// src/services/StorageService.ts
 var import_obsidian5 = require("obsidian");
-var PassphraseModal = class extends import_obsidian5.Modal {
+var StorageService = class {
+  constructor(app) {
+    this.BASE_FOLDER = "QuizDex";
+    this.QUIZZES_FOLDER = "QuizDex/Quizzes";
+    this.POKEDEX_FILE = "QuizDex/pokedex.json";
+    this.HISTORY_FILE = "QuizDex/history.json";
+    this.app = app;
+  }
+  /**
+   * Initialize QuizDex folder structure
+   */
+  async initialize() {
+    await this.ensureFolderExists(this.BASE_FOLDER);
+    await this.ensureFolderExists(this.QUIZZES_FOLDER);
+    if (!await this.app.vault.adapter.exists(this.POKEDEX_FILE)) {
+      const initialData = {
+        caughtPokemon: [],
+        totalCaught: 0,
+        lastUpdated: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      await this.app.vault.adapter.write(
+        this.POKEDEX_FILE,
+        JSON.stringify(initialData, null, 2)
+      );
+    }
+    if (!await this.app.vault.adapter.exists(this.HISTORY_FILE)) {
+      await this.app.vault.adapter.write(
+        this.HISTORY_FILE,
+        JSON.stringify([], null, 2)
+      );
+    }
+  }
+  /**
+   * Ensure a folder exists, create if it doesn't
+   */
+  async ensureFolderExists(path) {
+    var _a;
+    const normalizedPath = (0, import_obsidian5.normalizePath)(path);
+    const exists = await this.app.vault.adapter.exists(normalizedPath);
+    if (exists) {
+      return;
+    }
+    try {
+      await this.app.vault.createFolder(normalizedPath);
+      console.log(`\u2705 Created folder: ${normalizedPath}`);
+    } catch (error) {
+      if ((_a = error == null ? void 0 : error.message) == null ? void 0 : _a.includes("Folder already exists")) {
+        return;
+      }
+      throw error;
+    }
+  }
+  /**
+   * Save a quiz to the vault
+   */
+  async saveQuiz(quiz, sourceNotes, difficulty, provider) {
+    const timestamp = (/* @__PURE__ */ new Date()).toISOString().replace(/[:.]/g, "-");
+    let fileName = `Quiz_${timestamp}.md`;
+    let filePath = (0, import_obsidian5.normalizePath)(`${this.QUIZZES_FOLDER}/${fileName}`);
+    let collisionCounter = 1;
+    while (await this.app.vault.adapter.exists(filePath)) {
+      fileName = `Quiz_${timestamp}_${collisionCounter}.md`;
+      filePath = (0, import_obsidian5.normalizePath)(`${this.QUIZZES_FOLDER}/${fileName}`);
+      collisionCounter++;
+    }
+    const savedQuiz = {
+      quiz,
+      metadata: {
+        createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+        sourceNotes,
+        difficulty,
+        provider
+      }
+    };
+    const markdown = this.quizToMarkdown(savedQuiz);
+    await this.app.vault.create(filePath, markdown);
+    console.log(`\u2705 Saved quiz to: ${filePath}`);
+    return filePath;
+  }
+  /**
+   * Convert quiz to markdown format
+   */
+  quizToMarkdown(savedQuiz) {
+    const { quiz, metadata } = savedQuiz;
+    const lines = [];
+    lines.push("---");
+    lines.push(`quiz-id: ${quiz.id}`);
+    lines.push(`title: ${quiz.title}`);
+    lines.push(`created: ${metadata.createdAt}`);
+    lines.push(`difficulty: ${metadata.difficulty}`);
+    lines.push(`provider: ${metadata.provider}`);
+    lines.push(`source-notes:`);
+    metadata.sourceNotes.forEach((note) => lines.push(`  - ${note}`));
+    lines.push("---");
+    lines.push("");
+    lines.push(`# ${quiz.title}`);
+    lines.push("");
+    lines.push(`**Difficulty:** ${metadata.difficulty}`);
+    lines.push(`**Questions:** ${quiz.questions.length}`);
+    lines.push(`**Provider:** ${metadata.provider}`);
+    lines.push("");
+    lines.push("## Quiz Data");
+    lines.push("```json");
+    lines.push(JSON.stringify(savedQuiz, null, 2));
+    lines.push("```");
+    lines.push("");
+    lines.push("## Questions");
+    lines.push("");
+    quiz.questions.forEach((q, index) => {
+      lines.push(`### Question ${index + 1}`);
+      lines.push("");
+      lines.push(q.question);
+      lines.push("");
+      if (q.type === "multiple-choice" && q.options) {
+        lines.push("**Options:**");
+        q.options.forEach((opt, i) => {
+          const letter = String.fromCharCode(65 + i);
+          const isCorrect = opt === q.correctAnswer ? " \u2713" : "";
+          lines.push(`- ${letter}. ${opt}${isCorrect}`);
+        });
+      } else {
+        lines.push(`**Answer:** ${q.correctAnswer}`);
+      }
+      if (q.explanation) {
+        lines.push("");
+        lines.push(`**Explanation:** ${q.explanation}`);
+      }
+      lines.push("");
+    });
+    return lines.join("\n");
+  }
+  /**
+   * Load a quiz from a file
+   */
+  async loadQuiz(filePath) {
+    try {
+      const file = this.app.vault.getAbstractFileByPath(filePath);
+      if (!(file instanceof import_obsidian5.TFile)) {
+        return null;
+      }
+      const content = await this.app.vault.read(file);
+      const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/);
+      if (!jsonMatch) {
+        console.error("No JSON data found in quiz file");
+        return null;
+      }
+      const savedQuiz = JSON.parse(jsonMatch[1]);
+      return savedQuiz;
+    } catch (error) {
+      console.error("Error loading quiz:", error);
+      return null;
+    }
+  }
+  /**
+   * List all saved quizzes
+   */
+  async listQuizzes() {
+    const folder = this.app.vault.getAbstractFileByPath(this.QUIZZES_FOLDER);
+    if (!(folder instanceof import_obsidian5.TFolder)) {
+      return [];
+    }
+    const quizFiles = [];
+    for (const file of folder.children) {
+      if (file instanceof import_obsidian5.TFile && file.extension === "md") {
+        quizFiles.push(file);
+      }
+    }
+    quizFiles.sort((a, b) => b.stat.ctime - a.stat.ctime);
+    return quizFiles;
+  }
+  /**
+   * Save Pokédex data
+   */
+  async savePokedexData(data) {
+    data.lastUpdated = (/* @__PURE__ */ new Date()).toISOString();
+    await this.app.vault.adapter.write(
+      this.POKEDEX_FILE,
+      JSON.stringify(data, null, 2)
+    );
+  }
+  /**
+   * Load Pokédex data
+   */
+  async loadPokedexData() {
+    try {
+      const exists = await this.app.vault.adapter.exists(this.POKEDEX_FILE);
+      if (!exists) {
+        return {
+          caughtPokemon: [],
+          totalCaught: 0,
+          lastUpdated: (/* @__PURE__ */ new Date()).toISOString()
+        };
+      }
+      const content = await this.app.vault.adapter.read(this.POKEDEX_FILE);
+      const parsed = JSON.parse(content);
+      parsed.caughtPokemon = (parsed.caughtPokemon || []).map((p) => ({
+        id: p.id,
+        name: p.name,
+        caughtAt: p.caughtAt,
+        score: typeof p.score === "number" ? p.score : 0,
+        catchCount: p.catchCount && p.catchCount > 0 ? p.catchCount : 1
+      }));
+      parsed.totalCaught = parsed.caughtPokemon.length;
+      return parsed;
+    } catch (error) {
+      console.error("Error loading Pok\xE9dex data:", error);
+      return {
+        caughtPokemon: [],
+        totalCaught: 0,
+        lastUpdated: (/* @__PURE__ */ new Date()).toISOString()
+      };
+    }
+  }
+  /**
+   * Migrate Pokédex data from localStorage to vault
+   */
+  async migratePokedexFromLocalStorage() {
+    var _a;
+    try {
+      const stored = localStorage.getItem("quizdex-caught-pokemon");
+      if (!stored) {
+        return false;
+      }
+      const localData = JSON.parse(stored);
+      if (!Array.isArray(localData) || localData.length === 0) {
+        return false;
+      }
+      const vaultData = await this.loadPokedexData();
+      for (const pokemon of localData) {
+        const existing = vaultData.caughtPokemon.find((p) => p.id === pokemon.id);
+        if (existing) {
+          existing.catchCount = ((_a = existing.catchCount) != null ? _a : 1) + 1;
+          existing.caughtAt = pokemon.caughtAt || existing.caughtAt;
+          if (typeof pokemon.score === "number") {
+            existing.score = Math.max(existing.score, pokemon.score);
+          }
+        } else {
+          vaultData.caughtPokemon.push({
+            id: pokemon.id,
+            name: pokemon.name,
+            caughtAt: pokemon.caughtAt || (/* @__PURE__ */ new Date()).toISOString(),
+            score: typeof pokemon.score === "number" ? pokemon.score : 0,
+            catchCount: 1
+          });
+        }
+      }
+      vaultData.totalCaught = vaultData.caughtPokemon.length;
+      await this.savePokedexData(vaultData);
+      localStorage.removeItem("quizdex-caught-pokemon");
+      console.log(`\u2705 Migrated ${localData.length} Pok\xE9mon from localStorage to vault`);
+      return true;
+    } catch (error) {
+      console.error("Error migrating Pok\xE9dex data:", error);
+      return false;
+    }
+  }
+  /**
+   * Save quiz history
+   */
+  async saveQuizHistory(history) {
+    await this.app.vault.adapter.write(
+      this.HISTORY_FILE,
+      JSON.stringify(history, null, 2)
+    );
+  }
+  /**
+   * Load quiz history
+   */
+  async loadQuizHistory() {
+    try {
+      const exists = await this.app.vault.adapter.exists(this.HISTORY_FILE);
+      if (!exists) {
+        return [];
+      }
+      const content = await this.app.vault.adapter.read(this.HISTORY_FILE);
+      return JSON.parse(content);
+    } catch (error) {
+      console.error("Error loading quiz history:", error);
+      return [];
+    }
+  }
+  /**
+   * Record a quiz attempt
+   */
+  async recordQuizAttempt(quizId, result) {
+    const history = await this.loadQuizHistory();
+    let quizHistory = history.find((h) => h.quizId === quizId);
+    if (!quizHistory) {
+      quizHistory = {
+        quizId,
+        attempts: [],
+        lastAttempt: (/* @__PURE__ */ new Date()).toISOString(),
+        bestScore: 0
+      };
+      history.push(quizHistory);
+    }
+    quizHistory.attempts.push(result);
+    quizHistory.lastAttempt = (/* @__PURE__ */ new Date()).toISOString();
+    quizHistory.bestScore = Math.max(quizHistory.bestScore, result.score);
+    await this.saveQuizHistory(history);
+  }
+};
+
+// src/ui/PassphraseModal.ts
+var import_obsidian6 = require("obsidian");
+var PassphraseModal = class extends import_obsidian6.Modal {
   constructor(app, onSubmit, isNewPassphrase = false) {
     super(app);
     this.passphrase = "";
@@ -1253,7 +1558,7 @@ var PassphraseModal = class extends import_obsidian5.Modal {
         cls: "setting-item-description"
       }).style.marginBottom = "20px";
     }
-    new import_obsidian5.Setting(contentEl).setName("Passphrase").setDesc(this.isNewPassphrase ? "Minimum 8 characters (12+ recommended)" : "Enter your passphrase").addText((text) => {
+    new import_obsidian6.Setting(contentEl).setName("Passphrase").setDesc(this.isNewPassphrase ? "Minimum 8 characters (12+ recommended)" : "Enter your passphrase").addText((text) => {
       text.setPlaceholder("Enter passphrase").onChange((value) => this.passphrase = value);
       text.inputEl.type = "password";
       text.inputEl.addEventListener("keypress", (e) => {
@@ -1263,7 +1568,7 @@ var PassphraseModal = class extends import_obsidian5.Modal {
       });
     });
     if (this.isNewPassphrase) {
-      new import_obsidian5.Setting(contentEl).setName("Confirm Passphrase").setDesc("Re-enter to confirm").addText((text) => {
+      new import_obsidian6.Setting(contentEl).setName("Confirm Passphrase").setDesc("Re-enter to confirm").addText((text) => {
         text.setPlaceholder("Confirm passphrase").onChange((value) => this.confirmPassphrase = value);
         text.inputEl.type = "password";
         text.inputEl.addEventListener("keypress", (e) => {
@@ -1297,7 +1602,7 @@ var PassphraseModal = class extends import_obsidian5.Modal {
     buttonContainer.style.justifyContent = "flex-end";
     buttonContainer.style.gap = "10px";
     buttonContainer.style.marginTop = "20px";
-    new import_obsidian5.Setting(buttonContainer).addButton(
+    new import_obsidian6.Setting(buttonContainer).addButton(
       (btn) => btn.setButtonText("Cancel").onClick(() => {
         this.onSubmit(null);
         this.close();
@@ -1308,16 +1613,16 @@ var PassphraseModal = class extends import_obsidian5.Modal {
   }
   submit() {
     if (this.passphrase.length < 8) {
-      new import_obsidian5.Notice("\u26A0\uFE0F Passphrase must be at least 8 characters");
+      new import_obsidian6.Notice("\u26A0\uFE0F Passphrase must be at least 8 characters");
       return;
     }
     if (this.isNewPassphrase) {
       if (this.passphrase !== this.confirmPassphrase) {
-        new import_obsidian5.Notice("\u26A0\uFE0F Passphrases do not match");
+        new import_obsidian6.Notice("\u26A0\uFE0F Passphrases do not match");
         return;
       }
       if (this.passphrase.length < 12) {
-        new import_obsidian5.Notice("\u26A0\uFE0F Warning: Passphrase should be at least 12 characters for better security");
+        new import_obsidian6.Notice("\u26A0\uFE0F Warning: Passphrase should be at least 12 characters for better security");
       }
     }
     this.onSubmit(this.passphrase);
@@ -1330,7 +1635,7 @@ var PassphraseModal = class extends import_obsidian5.Modal {
     this.confirmPassphrase = "";
   }
 };
-var MigrationModal = class extends import_obsidian5.Modal {
+var MigrationModal = class extends import_obsidian6.Modal {
   constructor(app, insecureCount, onMigrate) {
     super(app);
     this.insecureCount = insecureCount;
@@ -1376,9 +1681,9 @@ var MigrationModal = class extends import_obsidian5.Modal {
     buttonContainer.style.display = "flex";
     buttonContainer.style.justifyContent = "space-between";
     buttonContainer.style.marginTop = "20px";
-    new import_obsidian5.Setting(buttonContainer).addButton(
+    new import_obsidian6.Setting(buttonContainer).addButton(
       (btn) => btn.setButtonText("Remind Me Later").onClick(() => {
-        new import_obsidian5.Notice("\u26A0\uFE0F Your API keys remain UNENCRYPTED. Please migrate soon!");
+        new import_obsidian6.Notice("\u26A0\uFE0F Your API keys remain UNENCRYPTED. Please migrate soon!");
         this.close();
       })
     ).addButton(
@@ -1399,8 +1704,8 @@ var MigrationModal = class extends import_obsidian5.Modal {
 };
 
 // src/ui/SettingsTab.ts
-var import_obsidian6 = require("obsidian");
-var QuizDexSettingTab = class extends import_obsidian6.PluginSettingTab {
+var import_obsidian7 = require("obsidian");
+var QuizDexSettingTab = class extends import_obsidian7.PluginSettingTab {
   constructor(app, plugin) {
     super(app, plugin);
     this.plugin = plugin;
@@ -1476,12 +1781,12 @@ var QuizDexSettingTab = class extends import_obsidian6.PluginSettingTab {
         attr: { style: "margin: 5px 0;" }
       });
     }
-    new import_obsidian6.Setting(containerEl).setName("Change Encryption Passphrase").setDesc("Update the passphrase used to encrypt your API keys").addButton(
+    new import_obsidian7.Setting(containerEl).setName("Change Encryption Passphrase").setDesc("Update the passphrase used to encrypt your API keys").addButton(
       (btn) => btn.setButtonText("Change Passphrase").onClick(async () => {
         await this.changePassphrase();
       })
     );
-    new import_obsidian6.Setting(containerEl).setName("Clear All Encrypted Credentials").setDesc("\u26A0\uFE0F Warning: This will permanently delete all encrypted API keys").addButton(
+    new import_obsidian7.Setting(containerEl).setName("Clear All Encrypted Credentials").setDesc("\u26A0\uFE0F Warning: This will permanently delete all encrypted API keys").addButton(
       (btn) => btn.setButtonText("Clear All").setWarning().onClick(async () => {
         await this.clearAllCredentials();
       })
@@ -1496,7 +1801,7 @@ var QuizDexSettingTab = class extends import_obsidian6.PluginSettingTab {
       text: "Configure AI providers for quiz generation. API keys are encrypted with AES-256-GCM.",
       cls: "setting-item-description"
     });
-    new import_obsidian6.Setting(containerEl).setName("Active Provider").setDesc("Default AI provider for quiz generation").addDropdown((dropdown) => {
+    new import_obsidian7.Setting(containerEl).setName("Active Provider").setDesc("Default AI provider for quiz generation").addDropdown((dropdown) => {
       const providers2 = ProviderFactory.getSupportedProviders();
       providers2.forEach((provider) => {
         dropdown.addOption(provider, ProviderFactory.getProviderDisplayName(provider));
@@ -1519,28 +1824,28 @@ var QuizDexSettingTab = class extends import_obsidian6.PluginSettingTab {
     const displayName = ProviderFactory.getProviderDisplayName(provider);
     const requiresKey = ProviderFactory.requiresApiKey(provider);
     containerEl.createEl("h3", { text: displayName });
-    new import_obsidian6.Setting(containerEl).setName(`${displayName} Base URL`).setDesc(provider === "ollama" ? "Local Ollama server endpoint" : "API endpoint URL").addText((text) => {
+    new import_obsidian7.Setting(containerEl).setName(`${displayName} Base URL`).setDesc(provider === "ollama" ? "Local Ollama server endpoint" : "API endpoint URL").addText((text) => {
       const key = `${provider}BaseURL`;
       text.setPlaceholder(provider === "ollama" ? "http://localhost:11434" : "https://api.example.com").setValue(this.plugin.settings[key] || "").onChange(async (value) => {
         this.plugin.settings[key] = value;
         await this.plugin.saveSettings();
       });
     });
-    new import_obsidian6.Setting(containerEl).setName(`${displayName} Model`).setDesc("Model to use for quiz generation").addText((text) => {
+    new import_obsidian7.Setting(containerEl).setName(`${displayName} Model`).setDesc("Model to use for quiz generation").addText((text) => {
       const key = `${provider}TextGenModel`;
       text.setPlaceholder(provider === "ollama" ? "llama3.1:8b" : "model-name").setValue(this.plugin.settings[key] || "").onChange(async (value) => {
         this.plugin.settings[key] = value;
         await this.plugin.saveSettings();
       });
     });
-    new import_obsidian6.Setting(containerEl).setName(`Test ${displayName} Connection`).setDesc(provider === "ollama" ? "Verify local Ollama server is running" : "Verify API key and connection").addButton(
+    new import_obsidian7.Setting(containerEl).setName(`Test ${displayName} Connection`).setDesc(provider === "ollama" ? "Verify local Ollama server is running" : "Verify API key and connection").addButton(
       (btn) => btn.setButtonText("Test Connection").onClick(async () => {
         await this.testProviderConnection(provider, displayName);
       })
     );
     if (requiresKey) {
       const hasKey = await this.plugin.credentialManager.hasCredential(provider);
-      new import_obsidian6.Setting(containerEl).setName(`${displayName} API Key`).setDesc(hasKey ? "\u2705 Encrypted key stored" : "Enter API key (will be encrypted)").addText((text) => {
+      new import_obsidian7.Setting(containerEl).setName(`${displayName} API Key`).setDesc(hasKey ? "\u2705 Encrypted key stored" : "Enter API key (will be encrypted)").addText((text) => {
         text.setPlaceholder(hasKey ? "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022" : "Enter API key");
         text.inputEl.type = "password";
         return text;
@@ -1563,25 +1868,25 @@ var QuizDexSettingTab = class extends import_obsidian6.PluginSettingTab {
    */
   renderQuizSettings(containerEl) {
     containerEl.createEl("h2", { text: "\u{1F4DD} Quiz Settings" });
-    new import_obsidian6.Setting(containerEl).setName("Default Number of Questions").setDesc("Default number of questions to generate").addSlider(
+    new import_obsidian7.Setting(containerEl).setName("Default Number of Questions").setDesc("Default number of questions to generate").addSlider(
       (slider) => slider.setLimits(5, 50, 5).setValue(this.plugin.settings.defaultQuestions).setDynamicTooltip().onChange(async (value) => {
         this.plugin.settings.defaultQuestions = value;
         await this.plugin.saveSettings();
       })
     );
-    new import_obsidian6.Setting(containerEl).setName("Default Difficulty").setDesc("Default difficulty level").addDropdown(
+    new import_obsidian7.Setting(containerEl).setName("Default Difficulty").setDesc("Default difficulty level").addDropdown(
       (dropdown) => dropdown.addOption("easy", "Easy").addOption("medium", "Medium").addOption("hard", "Hard").setValue(this.plugin.settings.defaultDifficulty).onChange(async (value) => {
         this.plugin.settings.defaultDifficulty = value;
         await this.plugin.saveSettings();
       })
     );
-    new import_obsidian6.Setting(containerEl).setName("Include Multiple Choice").setDesc("Generate multiple choice questions").addToggle(
+    new import_obsidian7.Setting(containerEl).setName("Include Multiple Choice").setDesc("Generate multiple choice questions").addToggle(
       (toggle) => toggle.setValue(this.plugin.settings.includeMultipleChoice).onChange(async (value) => {
         this.plugin.settings.includeMultipleChoice = value;
         await this.plugin.saveSettings();
       })
     );
-    new import_obsidian6.Setting(containerEl).setName("Include True/False").setDesc("Generate true/false questions").addToggle(
+    new import_obsidian7.Setting(containerEl).setName("Include True/False").setDesc("Generate true/false questions").addToggle(
       (toggle) => toggle.setValue(this.plugin.settings.includeTrueFalse).onChange(async (value) => {
         this.plugin.settings.includeTrueFalse = value;
         await this.plugin.saveSettings();
@@ -1594,7 +1899,7 @@ var QuizDexSettingTab = class extends import_obsidian6.PluginSettingTab {
   async saveApiKey(provider, displayName) {
     const input = document.querySelector(`input[type="password"][placeholder*="${displayName}"], input[type="password"][placeholder*="Enter API key"]`);
     if (!input || !input.value.trim()) {
-      new import_obsidian6.Notice("\u26A0\uFE0F Please enter an API key");
+      new import_obsidian7.Notice("\u26A0\uFE0F Please enter an API key");
       return;
     }
     const apiKey = input.value.trim();
@@ -1605,7 +1910,7 @@ var QuizDexSettingTab = class extends import_obsidian6.PluginSettingTab {
           return;
         const initialized = await this.plugin.credentialManager.initialize(passphrase);
         if (!initialized) {
-          new import_obsidian6.Notice("\u274C Invalid passphrase");
+          new import_obsidian7.Notice("\u274C Invalid passphrase");
           return;
         }
         const success = await this.plugin.credentialManager.setCredential(
@@ -1628,15 +1933,15 @@ var QuizDexSettingTab = class extends import_obsidian6.PluginSettingTab {
   async testProviderConnection(provider, displayName) {
     const providerInstance = this.plugin.orchestrator.getProvider(provider);
     if (!providerInstance) {
-      new import_obsidian6.Notice(`\u274C ${displayName} not configured`);
+      new import_obsidian7.Notice(`\u274C ${displayName} not configured`);
       return;
     }
-    new import_obsidian6.Notice(`\u23F3 Testing ${displayName} connection...`);
+    new import_obsidian7.Notice(`\u23F3 Testing ${displayName} connection...`);
     const health = await providerInstance.healthCheck();
     if (health.healthy) {
-      new import_obsidian6.Notice(`\u2705 ${displayName} connection successful! (${health.latency}ms)`);
+      new import_obsidian7.Notice(`\u2705 ${displayName} connection successful! (${health.latency}ms)`);
     } else {
-      new import_obsidian6.Notice(`\u274C ${displayName} connection failed: ${health.message || "Unknown error"}`);
+      new import_obsidian7.Notice(`\u274C ${displayName} connection failed: ${health.message || "Unknown error"}`);
     }
   }
   /**
@@ -1650,7 +1955,7 @@ var QuizDexSettingTab = class extends import_obsidian6.PluginSettingTab {
           return;
         const initialized = await this.plugin.credentialManager.initialize(passphrase);
         if (!initialized) {
-          new import_obsidian6.Notice("\u274C Failed to initialize encryption");
+          new import_obsidian7.Notice("\u274C Failed to initialize encryption");
           return;
         }
         const success = await this.plugin.credentialManager.migrateToEncrypted(
@@ -1676,7 +1981,7 @@ var QuizDexSettingTab = class extends import_obsidian6.PluginSettingTab {
    * Change encryption passphrase
    */
   async changePassphrase() {
-    new import_obsidian6.Notice("\u26A0\uFE0F Changing passphrase is not yet implemented. You can clear all credentials and re-enter them with a new passphrase.");
+    new import_obsidian7.Notice("\u26A0\uFE0F Changing passphrase is not yet implemented. You can clear all credentials and re-enter them with a new passphrase.");
   }
   /**
    * Clear all encrypted credentials
@@ -1714,7 +2019,7 @@ var DEFAULT_SETTINGS = {
   includeMultipleChoice: true,
   includeTrueFalse: true
 };
-var QuizDexPlugin = class extends import_obsidian7.Plugin {
+var QuizDexPlugin = class extends import_obsidian8.Plugin {
   constructor() {
     super(...arguments);
     this.passphraseCache = null;
@@ -1722,6 +2027,8 @@ var QuizDexPlugin = class extends import_obsidian7.Plugin {
   async onload() {
     console.log("Loading QuizDex v2.0...");
     await this.loadSettings();
+    this.storageService = new StorageService(this.app);
+    await this.storageService.initialize();
     this.credentialManager = new CredentialManager(this);
     this.orchestrator = new AIProviderOrchestrator();
     await this.checkAndMigrate();
@@ -1776,7 +2083,7 @@ var QuizDexPlugin = class extends import_obsidian7.Plugin {
     }
     const audit = await this.credentialManager.auditSecurity();
     if (audit.insecure > 0) {
-      new import_obsidian7.Notice(`\u26A0\uFE0F Found ${audit.insecure} unencrypted API key(s)`, 5e3);
+      new import_obsidian8.Notice(`\u26A0\uFE0F Found ${audit.insecure} unencrypted API key(s)`, 5e3);
       setTimeout(() => {
         new MigrationModal(
           this.app,
@@ -1797,7 +2104,7 @@ var QuizDexPlugin = class extends import_obsidian7.Plugin {
     try {
       const initialized = await this.credentialManager.initialize(passphrase);
       if (!initialized) {
-        new import_obsidian7.Notice("\u274C Failed to initialize encryption");
+        new import_obsidian8.Notice("\u274C Failed to initialize encryption");
         return;
       }
       const success = await this.credentialManager.migrateToEncrypted(
@@ -1815,12 +2122,12 @@ var QuizDexPlugin = class extends import_obsidian7.Plugin {
         this.settings.passphraseSet = true;
         await this.saveSettings();
         this.passphraseCache = passphrase;
-        new import_obsidian7.Notice("\u2705 Migration complete! Your API keys are now encrypted.");
+        new import_obsidian8.Notice("\u2705 Migration complete! Your API keys are now encrypted.");
         await this.initializeProviders();
       }
     } catch (error) {
       console.error("Migration failed:", error);
-      new import_obsidian7.Notice("\u274C Migration failed. Please try again.");
+      new import_obsidian8.Notice("\u274C Migration failed. Please try again.");
     }
   }
   /**
@@ -1847,7 +2154,7 @@ var QuizDexPlugin = class extends import_obsidian7.Plugin {
               this.passphraseCache = passphrase;
               resolve(true);
             } else {
-              new import_obsidian7.Notice("\u274C Invalid passphrase");
+              new import_obsidian8.Notice("\u274C Invalid passphrase");
               resolve(false);
             }
           } else {
@@ -1898,15 +2205,15 @@ var QuizDexPlugin = class extends import_obsidian7.Plugin {
   async generateQuizFromActiveFile() {
     const activeFile = this.app.workspace.getActiveFile();
     if (!activeFile) {
-      new import_obsidian7.Notice("\u26A0\uFE0F No active file open");
+      new import_obsidian8.Notice("\u26A0\uFE0F No active file open");
       return;
     }
     const unlocked = await this.ensurePassphraseUnlocked();
     if (!unlocked) {
-      new import_obsidian7.Notice("\u274C Cannot generate quiz without unlocking encrypted credentials");
+      new import_obsidian8.Notice("\u274C Cannot generate quiz without unlocking encrypted credentials");
       return;
     }
-    new import_obsidian7.Notice(`\u{1F3AE} Generating quiz from "${activeFile.basename}"...`);
+    new import_obsidian8.Notice(`\u{1F3AE} Generating quiz from "${activeFile.basename}"...`);
   }
   /**
    * Generate quiz command (select notes)
@@ -1914,10 +2221,10 @@ var QuizDexPlugin = class extends import_obsidian7.Plugin {
   async generateQuizCommand() {
     const unlocked = await this.ensurePassphraseUnlocked();
     if (!unlocked) {
-      new import_obsidian7.Notice("\u274C Cannot generate quiz without unlocking encrypted credentials");
+      new import_obsidian8.Notice("\u274C Cannot generate quiz without unlocking encrypted credentials");
       return;
     }
-    new import_obsidian7.Notice("\u{1F3AE} Quiz generation from selected notes coming soon!");
+    new import_obsidian8.Notice("\u{1F3AE} Quiz generation from selected notes coming soon!");
   }
   /**
    * Run security audit command
@@ -1933,7 +2240,7 @@ var QuizDexPlugin = class extends import_obsidian7.Plugin {
       audit.secure > 0 ? `Providers with encrypted keys: ${audit.providers.join(", ")}` : "",
       audit.insecure > 0 ? `\u26A0\uFE0F Please migrate to encrypted storage!` : ""
     ].filter(Boolean).join("\n");
-    new import_obsidian7.Notice(message, 1e4);
+    new import_obsidian8.Notice(message, 1e4);
     console.log("Security Audit:", audit);
   }
   /**
@@ -1958,7 +2265,17 @@ var QuizDexPlugin = class extends import_obsidian7.Plugin {
         statusMessages.push(`${stateIcon} ${provider}: ${(breaker == null ? void 0 : breaker.state) || "unknown"} (${failures} failures)`);
       }
     }
-    new import_obsidian7.Notice(statusMessages.join("\n"), 8e3);
+    new import_obsidian8.Notice(statusMessages.join("\n"), 8e3);
     console.log("Provider Status:", Object.fromEntries(status));
+  }
+  /**
+   * Get the path to the Pokemon icon asset
+   */
+  getPokemonIconPath() {
+    var _a;
+    const adapter = this.app.vault.adapter;
+    const pluginDir = ((_a = adapter.getBasePath) == null ? void 0 : _a.call(adapter)) || "";
+    const iconPath = `${pluginDir}/.obsidian/plugins/quizdex/assets/icons/pokemon-go.png`;
+    return iconPath;
   }
 };

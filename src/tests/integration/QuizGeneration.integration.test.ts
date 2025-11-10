@@ -69,8 +69,7 @@ A closure is a function that has access to variables in its outer scope, even af
 			// Setup provider
 			await ollamaProvider.initialize({
 				baseURL: 'http://localhost:11434',
-				model: 'llama3.1:8b',
-				maxPromptCharacters: 12000
+				model: 'llama3.1:8b'
 			});
 
 			orchestrator.registerProvider(ollamaProvider);
@@ -189,8 +188,7 @@ A closure is a function that has access to variables in its outer scope, even af
 		beforeEach(async () => {
 			await ollamaProvider.initialize({
 				baseURL: 'http://localhost:11434',
-				model: 'llama3.1:8b',
-				maxPromptCharacters: 12000
+				model: 'llama3.1:8b'
 			});
 			orchestrator.registerProvider(ollamaProvider);
 		});

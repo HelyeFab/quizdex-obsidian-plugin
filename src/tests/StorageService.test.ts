@@ -443,9 +443,9 @@ describe('StorageService', () => {
 				quizId: 'quiz-1',
 				score: 80,
 				totalQuestions: 10,
-				correctAnswers: 8,
-				timestamp: '2025-01-01',
-				timeSpent: 120,
+				correctCount: 8,
+				completedAt: '2025-01-01',
+				timeTaken: 120,
 				answers: new Map()
 			};
 
@@ -477,9 +477,9 @@ describe('StorageService', () => {
 				quizId: 'quiz-1',
 				score: 90,
 				totalQuestions: 10,
-				correctAnswers: 9,
-				timestamp: '2025-01-02',
-				timeSpent: 100,
+				correctCount: 9,
+				completedAt: '2025-01-02',
+				timeTaken: 100,
 				answers: new Map()
 			};
 

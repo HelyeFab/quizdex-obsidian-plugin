@@ -176,9 +176,7 @@ describe('ProviderFactory', () => {
 				baseURL: 'http://localhost:11434',
 				model: 'llama3.1:8b',
 				timeout: 120000,
-				maxRetries: 5,
-				maxPromptCharacters: 15000,
-				keepAliveSeconds: 600
+				maxRetries: 5
 			};
 
 			const getConfig = vi.fn(async (provider: string) => {
